@@ -27,8 +27,8 @@ client2 = AzureOpenAI(
 )
 dsn = f"dbname={os.getenv('DB_NAME')} user={os.getenv('DB_USER')} password={os.getenv('DB_PASSWORD')} host={os.getenv('DB_HOST')}"
 client = weaviate.Client(
-    url="http://combined-weaviate-1:5432",
-    startup_period=10
+    url="http://172.31.27.62:5432",
+    startup_period=30
 )
 # Define a schema with a class representing your data
 schema = {

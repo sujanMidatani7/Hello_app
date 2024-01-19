@@ -10,21 +10,24 @@ import os
 import weaviate
 import numpy as np
 # import weaviate.classes as wvc
+from dotenv import load_dotenv
 import json
 from openai import AzureOpenAI
 app=FastAPI()
-os.environ["OPENAI_API_TYPE"] = "azure_ad"
-os.environ["AZURE_OPENAI_API_KEY"] = "84e595d7cbdb4e32b03a98b7ea6e755b"
+load_dotenv()
+
+
 # gets the API Key from environment variable AZURE_OPENAI_API_KEY
 client2 = AzureOpenAI(
     # https://learn.microsoft.com/en-us/azure/ai-services/openai/reference#rest-api-versioning
-    api_version="2023-07-01-preview",
+    api_version=os.getenv('API_VERSION'),
     # https://learn.microsoft.com/en-us/azure/cognitive-services/openai/how-to/create-resource?pivots=web-portal#create-a-resource
-    azure_endpoint="https://virtualinterview.openai.azure.com",
+    azure_endpoint=os.getenv("API_ENDPOINT"),
 )
-dsn = "dbname=testDB user=postgres password=Postgres05 host=172.18.0.2"
+dsn = f"dbname={os.getenv('DB_NAME')} user={os.getenv('DB_USER')} password={os.getenv('DB_PASSWORD')} host={os.getenv('DB_HOST')}"
 client = weaviate.Client(
-    url="http://localhost:5435/"
+    url="http://combined-weaviate-1:5432",
+    startup_period=10
 )
 # Define a schema with a class representing your data
 schema = {
@@ -45,7 +48,7 @@ schema = {
         }
 async def get_embedding(text, model="text-embedding-ada-002"):
    text = text.replace("\n", " ")
-   print(client2.embeddings.create(input = [text], model=model).data[0].embedding)
+#    print(client2.embeddings.create(input = [text], model=model).data[0].embedding)
    return (client2.embeddings.create(input = [text], model=model).data[0].embedding)
 async def insert_data_to_weaviate(name,vector):
     class_obj = {"class": "DocumentSearch", "vectorizer": "none"}
@@ -54,21 +57,23 @@ async def insert_data_to_weaviate(name,vector):
         client.schema.create_class(class_obj)
         print(f"Product class was created because it didn't exist.")
     else:
-        # client.schema.delete_class("DocumentSearch")
+        
         print(f"Product class already exists")
-        # client.schema.create_class(class_obj)
+        
     documents = [name]
     client.batch.configure(batch_size=len(documents))
     with client.batch as batch:
         for i, doc in enumerate(documents):
             properties = {"source_text": doc}
             batch.add_data_object(properties, "DocumentSearch", vector=vector)
+  
+
 async def review_data(vector_array):
     result = client.query.get("DocumentSearch", ["source_text"]).with_near_vector({
         "vector": vector_array,
         "certainty": 0.7
     }).with_limit(2).with_additional(['certainty', 'distance']).do()
-    print(json.dumps(result,indent=4))
+    return json.dumps(result,indent=4)
 def create_table_if_not_exists():
     with psycopg2.connect(dsn) as conn:
         with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
@@ -78,7 +83,10 @@ def create_table_if_not_exists():
             print('Table Users exists?', table_exists)
             if not table_exists:
                 # Create the table if it doesn't exist
-                cur.execute("CREATE TABLE Users(Id SERIAL PRIMARY KEY, Name VARCHAR(20))")
+                try:
+                    cur.execute("CREATE TABLE Users(Id SERIAL PRIMARY KEY, Name VARCHAR(20))")
+                except:
+                    pass
 async def insert_name_to_database(name):
     async with aiopg.create_pool(dsn) as pool:
         async with pool.acquire() as conn:
@@ -96,6 +104,7 @@ async def insert_name_to_database(name):
                         print("Name already exists:", name)
                 except Exception as e:
                     print(f"Error inserting data: {e}")
+@app.get("/getRecords")
 async def query_names():
     async with aiopg.create_pool(dsn) as pool:
         async with pool.acquire() as conn:
@@ -105,11 +114,9 @@ async def query_names():
                     await cur.execute("SELECT * FROM Users")
                     rows = await cur.fetchall()
                     # Print all the values
-                    for row in rows:
-                        print(row)
-                    print("Successful")
+                    return rows
                 except Exception as e:
-                    print(f"Error querying data: {e}")
+                    return f"Error querying data: {e}"
 def generate_openai_embedding(name):
     # Call the OpenAI embeddings API
     response = openai.Embed.create(
@@ -120,11 +127,11 @@ def generate_openai_embedding(name):
     print(response['choices'][0]['embedding'])
 @app.get("/hello/{name}")
 async def read_item(name: str):
-    create_table_if_not_exists
+    create_table_if_not_exists()
     await (insert_name_to_database(name))  # Start database operation asynchronously
     embedding_result = np.array(await get_embedding(name))
     # print(embedding_result)
-    await query_names()
+    
     await insert_data_to_weaviate(name, embedding_result)
-    await review_data(embedding_result)
+    # await review_data(embedding_result)
     return {"message": f"Hello, {name}! Successfully updated."}

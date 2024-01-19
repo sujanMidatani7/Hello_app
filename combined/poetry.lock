@@ -2206,6 +2206,20 @@ files = [
 six = ">=1.5"
 
 [[package]]
+name = "python-dotenv"
+version = "0.21.0"
+description = "Read key-value pairs from a .env file and set them as environment variables"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "python-dotenv-0.21.0.tar.gz", hash = "sha256:b77d08274639e3d34145dfa6c7008e66df0f04b7be7a75fd0d5292c191d79045"},
+    {file = "python_dotenv-0.21.0-py3-none-any.whl", hash = "sha256:1684eb44636dd462b66c3ee016599815514527ad99965de77f43e0944634a7e5"},
+]
+
+[package.extras]
+cli = ["click (>=5.0)"]
+
+[[package]]
 name = "python-multipart"
 version = "0.0.5"
 description = "A streaming multipart parser for Python"
@@ -2403,4 +2417,4 @@ grpc = ["grpcio (>=1.57.0,<2.0.0)", "grpcio-tools (>=1.57.0,<2.0.0)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "3.10.2"
-content-hash = "33200ad7bffe451f234b27deaae7fa5257f8bdef3dc13b6ed818c1e5df31e1f3"
+content-hash = "713fb9b8ab63e13ab35f09bf20ea36b14cb93a8acb9f166eafc6af4c58786b91"

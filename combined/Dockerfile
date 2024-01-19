@@ -15,17 +15,17 @@ RUN poetry config virtualenvs.create false && \
     poetry install --no-interaction --no-ansi
 
 # Add this line to your Dockerfile before the application starts
-# RUN apt-get update && apt-get install -y postgresql-client
+RUN apt-get update && apt-get install -y postgresql-client
 
 
 # Copy the rest of the application code to /app
 COPY . /app
 
 # Set environment variables for PostgreSQL
-# ENV POSTGRES_DB postgres
-# ENV POSTGRES_USER postgres
-# ENV POSTGRES_PASSWORD sujanm@9271
-# ENV POSTGRES_HOST 5432
+ENV POSTGRES_DB postgres
+ENV POSTGRES_USER postgres
+ENV POSTGRES_PASSWORD sujanm@9271
+ENV POSTGRES_HOST 172.18.0.2
 
 # Create and populate the database
 # RUN python -c "from postgre import create_table_if_not_exists; create_table_if_not_exists()"
@@ -35,7 +35,7 @@ EXPOSE 8080
 
 
 # Define environment variable
-# ENV DSN "dbname=$POSTGRES_DB user=$POSTGRES_USER password=$POSTGRES_PASSWORD host=$POSTGRES_HOST"
+ENV DSN "dbname=$POSTGRES_DB user=$POSTGRES_USER password=$POSTGRES_PASSWORD host=$POSTGRES_HOST"
 
 # Run the FastAPI application
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8080"]

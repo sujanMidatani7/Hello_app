@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "helloworld1"
+version = "0.1.0"
+description = ""
+authors = ["Sujan","Supriya"]
+license = "MIT"
+[tool.poetry.dependencies]
+python="3.10.2"
+numpy="1.26.3"
+python-dotenv="0.21.0"
+requests = { version = ">=2.30.0,<3.0.0", python = ">=3.7" }
+fastapi = { version = "^0.68.2", python = ">=3.7" }
+uvicorn = "^0.15.0"
+python-multipart = "^0.0.5"
+pydantic = { version = "^1.8.1", python = ">=3.7" }
+psycopg2 = { version = "2.9.9", python = ">=3.7" }
+aiopg = { version = "1.3.5", python = ">=3.7" }
+openai = { version = "^1.7.0", python = ">=3.7.1" }
+asgiref = { version = ">=3.7,<4.0", python = ">=3.7" }
+typing-extensions = { version = "*", python = ">=3.8" }
+weaviate-client = { version="3.26.1", python = ">=3.8" }
+azure = "^4.0.0"
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

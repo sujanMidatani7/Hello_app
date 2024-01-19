@@ -13,6 +13,7 @@ import numpy as np
 from dotenv import load_dotenv
 import json
 from openai import AzureOpenAI
+
 app=FastAPI()
 load_dotenv()
 
@@ -133,5 +134,8 @@ async def read_item(name: str):
     # print(embedding_result)
     
     await insert_data_to_weaviate(name, embedding_result)
+
     # await review_data(embedding_result)
     return {"message": f"Hello, {name}! Successfully updated."}
+
+

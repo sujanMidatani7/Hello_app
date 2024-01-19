@@ -12,9 +12,6 @@ import numpy as np
 # import weaviate.classes as wvc
 import json
 from openai import AzureOpenAI
-app=FastAPI()
-os.environ["OPENAI_API_TYPE"] = "azure_ad"
-os.environ["AZURE_OPENAI_API_KEY"] = "84e595d7cbdb4e32b03a98b7ea6e755b"
 # gets the API Key from environment variable AZURE_OPENAI_API_KEY
 client2 = AzureOpenAI(
     # https://learn.microsoft.com/en-us/azure/ai-services/openai/reference#rest-api-versioning
